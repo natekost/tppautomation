@@ -2,12 +2,12 @@
 $FolderName = "C:\tpp\"
 $ExfiltrateFolder = "exfiltrate"
 $HiddenPSFileName = "evil.ps1"
-$CmdFile = "bits1.cmd"
 $EvilPDF = "payload.pdf"
 $EvilSCT = "payload.sct"
 $UploadURI = ($TPPSecurityTestSite + "upload.php")
 $username = [System.Security.Principal.WindowsIdentity]::GetCurrent().Name
 
+Write-Host $username
 if (Test-Path $FolderName) {
     Write-Host "TPP folder exists"
 }
